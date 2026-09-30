@@ -20,7 +20,7 @@ tenantId = "<xero-tenant-id>"
 folderName = "<folder-name, e.g. Supplier invoices>"
 invoiceId = "<invoice-id>"
 documentName = "<file-name, e.g. invoice-1001.pdf>"
-documentBase64 = "<base64-encoded-file-content>"
+documentPath = "<path-to-the-file, e.g. ./invoice-1001.pdf>"
 documentMimeType = "application/pdf"
 ```
 

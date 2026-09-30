@@ -34,4 +34,10 @@ export XERO_TENANT_ID="<xero-tenant-id>"
 bal test --groups live_tests
 ```
 
-The live tests only read data. The read operations assume the organisation already has at least one file, a folder and an association.
+The live tests only read data. The read operations assume the organisation already has at least one file, a folder and an association. By default the tests use the first file, the first folder and the first association of that file. To test against specific records, set their IDs:
+
+```bash
+export XERO_FILE_ID="<file-id>"
+export XERO_FOLDER_ID="<folder-id>"
+export XERO_OBJECT_ID="<id-of-an-object-with-an-associated-file>"
+```

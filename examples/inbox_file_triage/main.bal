@@ -18,11 +18,11 @@ public function main() returns error? {
     });
 
     files:Folder inbox = check xeroFiles->getInbox({xeroTenantId: tenantId});
-    string? inboxId = inbox.Id;
+    string? inboxId = inbox.id;
     if inboxId is () {
         return error("Xero did not return an id for the inbox");
     }
-    io:println("Inbox holds ", inbox.FileCount ?: 0, " file(s)");
+    io:println("Inbox holds ", inbox.fileCount ?: 0, " file(s)");
 
     files:FileObject[] waiting = [];
     int page = 1;

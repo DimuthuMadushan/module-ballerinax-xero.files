@@ -42,11 +42,11 @@ function sampleAssociation(string fileId = "3f8a1c52-6a7e-4c1e-9e3b-0d5f0a2b7c11
 };
 
 function sampleFolder(string id = "b2a9d5c0-1d44-4b0e-8f2a-6c3e91f7a001", string name = "Contracts") returns Folder => {
-    Name: name,
-    FileCount: 4,
-    Email: "contracts@files.xero.com",
-    IsInbox: false,
-    Id: id
+    name,
+    fileCount: 4,
+    email: "contracts@files.xero.com",
+    isInbox: false,
+    id
 };
 
 service / on ep0 {
@@ -162,7 +162,7 @@ service / on ep0 {
     # + xeroTenantId - Xero identifier for Tenant
     # + return - The inbox folder 
     resource function get Inbox(@http:Header {name: "xero-tenant-id"} string xeroTenantId) returns Folder {
-        return {Name: "Inbox", FileCount: 3, Email: "inbox@files.xero.com", IsInbox: true, Id: "e1f2a3b4-5c6d-4e7f-8a9b-0c1d2e3f4a5b"};
+        return {name: "Inbox", fileCount: 3, email: "inbox@files.xero.com", isInbox: true, id: "e1f2a3b4-5c6d-4e7f-8a9b-0c1d2e3f4a5b"};
     }
 
     # Uploads a File to the inbox
@@ -214,7 +214,7 @@ service / on ep0 {
     # http:Ok (The created folder)
     # http:BadRequest (invalid input, object invalid)
     resource function post Folders(@http:Header {name: "xero-tenant-id"} string xeroTenantId, @http:Header {name: "Idempotency-Key"} string? idempotencyKey, @http:Payload Folder payload) returns FolderOk|JsonBadRequest {
-        return {body: sampleFolder("d3e4f5a6-7b8c-4d9e-8f0a-1b2c3d4e5f6a", payload.Name ?: "New Folder")};
+        return {body: sampleFolder("d3e4f5a6-7b8c-4d9e-8f0a-1b2c3d4e5f6a", payload.name)};
     }
 
     # Update a file
@@ -242,7 +242,7 @@ service / on ep0 {
     # http:Ok (The updated folder)
     # http:BadRequest (invalid input, object invalid)
     resource function put Folders/[string folderId](@http:Header {name: "xero-tenant-id"} string xeroTenantId, @http:Header {name: "Idempotency-Key"} string? idempotencyKey, @http:Payload Folder payload) returns Folder|JsonBadRequest {
-        return sampleFolder(folderId, payload.Name ?: "Contracts");
+        return sampleFolder(folderId, payload.name);
     }
 }
 

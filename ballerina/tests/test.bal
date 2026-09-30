@@ -32,6 +32,48 @@ const string SAMPLE_FILE_ID = "3f8a1c52-6a7e-4c1e-9e3b-0d5f0a2b7c11";
 const string SAMPLE_FOLDER_ID = "b2a9d5c0-1d44-4b0e-8f2a-6c3e91f7a001";
 const string SAMPLE_OBJECT_ID = "9c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e5f";
 
+// Live tests read the IDs from XERO_FILE_ID, XERO_FOLDER_ID and XERO_OBJECT_ID, or look
+// them up in the tenant when those are not set. Mock tests use the sample IDs.
+function liveFileId() returns string|error {
+    if !isLiveServer {
+        return SAMPLE_FILE_ID;
+    }
+    string configured = os:getEnv("XERO_FILE_ID");
+    if configured != "" {
+        return configured;
+    }
+    FileList files = check xeroFiles->listFiles({xeroTenantId: tenantId}, {pagesize: 1});
+    FileObject[] items = files.items ?: [];
+    string? id = items.length() > 0 ? items[0].id : ();
+    return id ?: error("The tenant has no files; set XERO_FILE_ID");
+}
+
+function liveFolderId() returns string|error {
+    if !isLiveServer {
+        return SAMPLE_FOLDER_ID;
+    }
+    string configured = os:getEnv("XERO_FOLDER_ID");
+    if configured != "" {
+        return configured;
+    }
+    Folder[] folders = check xeroFiles->listFolders({xeroTenantId: tenantId});
+    string? id = folders.length() > 0 ? folders[0].id : ();
+    return id ?: error("The tenant has no folders; set XERO_FOLDER_ID");
+}
+
+function liveObjectId() returns string|error {
+    if !isLiveServer {
+        return SAMPLE_OBJECT_ID;
+    }
+    string configured = os:getEnv("XERO_OBJECT_ID");
+    if configured != "" {
+        return configured;
+    }
+    Association[] associations = check xeroFiles->listFileAssociations(check liveFileId(), {xeroTenantId: tenantId});
+    string? id = associations.length() > 0 ? associations[0].objectId : ();
+    return id ?: error("The file has no associations; set XERO_OBJECT_ID");
+}
+
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testListFiles() returns error? {
     FileList response = check xeroFiles->listFiles({xeroTenantId: tenantId});
@@ -45,14 +87,14 @@ function testUploadFile() returns error? {
         filename: "uploaded-file.pdf",
         name: "uploaded-file.pdf",
         mimeType: "application/pdf",
-        body: "c2FtcGxlIGZpbGUgY29udGVudA=="
+        body: {fileContent: "sample file content".toBytes(), fileName: "uploaded-file.pdf"}
     });
     test:assertTrue(response.id is string);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testGetFile() returns error? {
-    FileObject response = check xeroFiles->getFile(SAMPLE_FILE_ID, {xeroTenantId: tenantId});
+    FileObject response = check xeroFiles->getFile(check liveFileId(), {xeroTenantId: tenantId});
     test:assertTrue(response.id is string);
 }
 
@@ -64,12 +106,12 @@ function testUpdateFile() returns error? {
 
 @test:Config {groups: ["mock_tests"]}
 function testDeleteFile() returns error? {
-    Folder folder = check xeroFiles->createFolder({xeroTenantId: tenantId}, {Name: "Delete file test"});
-    FileObject created = check xeroFiles->uploadFileToFolder(folder.Id ?: SAMPLE_FOLDER_ID, {xeroTenantId: tenantId}, {
+    Folder folder = check xeroFiles->createFolder({xeroTenantId: tenantId}, {name: "Delete file test"});
+    FileObject created = check xeroFiles->uploadFileToFolder(folder.id ?: SAMPLE_FOLDER_ID, {xeroTenantId: tenantId}, {
         filename: "to-delete.pdf",
         name: "to-delete.pdf",
         mimeType: "application/pdf",
-        body: "c2FtcGxlIGZpbGUgY29udGVudA=="
+        body: {fileContent: "sample file content".toBytes(), fileName: "to-delete.pdf"}
     });
     error? response = xeroFiles->deleteFile(created.id ?: SAMPLE_FILE_ID, {xeroTenantId: tenantId});
     test:assertTrue(response is ());
@@ -81,20 +123,20 @@ function testUploadFileToFolder() returns error? {
         filename: "uploaded-to-folder.pdf",
         name: "uploaded-to-folder.pdf",
         mimeType: "application/pdf",
-        body: "c2FtcGxlIGZpbGUgY29udGVudA=="
+        body: {fileContent: "sample file content".toBytes(), fileName: "uploaded-to-folder.pdf"}
     });
     test:assertEquals(response.folderId, SAMPLE_FOLDER_ID);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testGetFileContent() returns error? {
-    byte[] response = check xeroFiles->getFileContent(SAMPLE_FILE_ID, {xeroTenantId: tenantId});
+    byte[] response = check xeroFiles->getFileContent(check liveFileId(), {xeroTenantId: tenantId});
     test:assertTrue(response.length() > 0);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testListFileAssociations() returns error? {
-    Association[] response = check xeroFiles->listFileAssociations(SAMPLE_FILE_ID, {xeroTenantId: tenantId});
+    Association[] response = check xeroFiles->listFileAssociations(check liveFileId(), {xeroTenantId: tenantId});
     test:assertTrue(response.length() > 0);
 }
 
@@ -113,13 +155,13 @@ function testDeleteFileAssociation() returns error? {
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testListObjectAssociations() returns error? {
-    Association[] response = check xeroFiles->listObjectAssociations(SAMPLE_OBJECT_ID, {xeroTenantId: tenantId});
+    Association[] response = check xeroFiles->listObjectAssociations(check liveObjectId(), {xeroTenantId: tenantId});
     test:assertTrue(response.length() > 0);
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testCountAssociations() returns error? {
-    record {} response = check xeroFiles->countAssociations({xeroTenantId: tenantId}, {objectIds: [SAMPLE_OBJECT_ID]});
+    record {} response = check xeroFiles->countAssociations({xeroTenantId: tenantId}, {objectIds: [check liveObjectId()]});
     test:assertTrue(response.length() > 0);
 }
 
@@ -131,31 +173,31 @@ function testListFolders() returns error? {
 
 @test:Config {groups: ["mock_tests"]}
 function testCreateFolder() returns error? {
-    Folder response = check xeroFiles->createFolder({xeroTenantId: tenantId}, {Name: "Invoices"});
-    test:assertEquals(response.Name, "Invoices");
+    Folder response = check xeroFiles->createFolder({xeroTenantId: tenantId}, {name: "Invoices"});
+    test:assertEquals(response.name, "Invoices");
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testGetFolder() returns error? {
-    Folder response = check xeroFiles->getFolder(SAMPLE_FOLDER_ID, {xeroTenantId: tenantId});
-    test:assertTrue(response.Id is string);
+    Folder response = check xeroFiles->getFolder(check liveFolderId(), {xeroTenantId: tenantId});
+    test:assertTrue(response.id is string);
 }
 
 @test:Config {groups: ["mock_tests"]}
 function testUpdateFolder() returns error? {
-    Folder response = check xeroFiles->updateFolder(SAMPLE_FOLDER_ID, {xeroTenantId: tenantId}, {Name: "Archive"});
-    test:assertEquals(response.Name, "Archive");
+    Folder response = check xeroFiles->updateFolder(SAMPLE_FOLDER_ID, {xeroTenantId: tenantId}, {name: "Archive"});
+    test:assertEquals(response.name, "Archive");
 }
 
 @test:Config {groups: ["mock_tests"]}
 function testDeleteFolder() returns error? {
-    Folder created = check xeroFiles->createFolder({xeroTenantId: tenantId}, {Name: "To delete"});
-    error? response = xeroFiles->deleteFolder(created.Id ?: SAMPLE_FOLDER_ID, {xeroTenantId: tenantId});
+    Folder created = check xeroFiles->createFolder({xeroTenantId: tenantId}, {name: "To delete"});
+    error? response = xeroFiles->deleteFolder(created.id ?: SAMPLE_FOLDER_ID, {xeroTenantId: tenantId});
     test:assertTrue(response is ());
 }
 
 @test:Config {groups: ["live_tests", "mock_tests"]}
 function testGetInbox() returns error? {
     Folder response = check xeroFiles->getInbox({xeroTenantId: tenantId});
-    test:assertEquals(response.IsInbox, true);
+    test:assertEquals(response.isInbox, true);
 }

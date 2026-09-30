@@ -535,7 +535,7 @@ paths:
         description: A comma-separated list of object ids
         required: true
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -936,13 +936,8 @@ components:
           type: string
         body:
           type: string
-          format: byte
+          format: binary
     FileObject:
-      required:
-      - id
-      - manufacturer
-      - name
-      - releaseDate
       type: object
       properties:
         CreatedDateUtc:
@@ -1008,30 +1003,36 @@ components:
           x-ballerina-name: items
     Folder:
       required:
-      - name
+      - Name
+      type: object
       properties:
         Name:
           type: string
           description: The name of the folder
           example: assets
+          x-ballerina-name: name
         FileCount:
           type: integer
           description: The number of files in the folder
           example: 5
+          x-ballerina-name: fileCount
         Email:
           type: string
           description: The email address used to email files to the inbox. Only the inbox will have this
             element.
           example: foo@bar.com
+          x-ballerina-name: email
         IsInbox:
           type: boolean
           description: to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted.
           example: true
+          x-ballerina-name: isInbox
         Id:
           type: string
           description: Xero unique identifier for a folder  Files
           format: uuid
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
+          x-ballerina-name: id
   parameters:
     requiredHeader:
       name: xero-tenant-id

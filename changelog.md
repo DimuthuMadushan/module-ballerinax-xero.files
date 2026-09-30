@@ -10,3 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Regenerated the connector from the Xero Files API specification, using remote methods for all operations.
 - Renamed the list and count operations to `listFiles`, `listFolders`, `listFileAssociations`, `listObjectAssociations` and `countAssociations`.
+- `Folder` fields are camelCase (`name`, `fileCount`, `email`, `isInbox`, `id`), and `name` is required.
+- `FileUploadRequest.body` takes the file as `record {byte[] fileContent; string fileName;}` instead of a base64 string.
+
+### Fixed
+
+- `countAssociations` sends `ObjectIds` as a comma-separated list.

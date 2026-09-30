@@ -40,6 +40,35 @@ These changes are done in order to improve the overall usability, and as workaro
 5. Known limitation: `POST /Files/{folderId}` and `PUT /Files/{fileId}` share a path template that differs only by parameter name.
 
    **Reason**: This is how Xero documents them. Both are kept, and the client methods are remote, so there is no resource-path conflict.
+6. Send the upload body as a file.
+
+   Original: `FileUploadRequest.body` is `type: string, format: byte` \
+   Updated: `type: string, format: binary`
+
+   **Reason**: The upload operations carry the file itself in a multipart part. As a byte string the body was typed `string` and sent as a text part, so Xero stored the base64 text instead of the document. As binary it is typed `record {byte[] fileContent; string fileName;}`, which `createBodyParts` sends as a file part with a filename. This takes effect only once `uploadFile` and `uploadFileToFolder` pass the payload to `createBodyParts` directly. The generated `createBodyParts(check jsondata:toJson(payload).ensureType())` turns the bytes into a JSON array first.
+
+7. Send `ObjectIds` as a comma-separated list.
+
+   Original: the `ObjectIds` query parameter of `GET /Associations/Count` has `explode: true` \
+   Updated: `explode: false`
+
+   **Reason**: The parameter is documented as a comma-separated list of object IDs. With `explode: true` several IDs were sent as repeated `ObjectIds=` parameters.
+
+8. Remove the `required` list from `FileObject`.
+
+   Original: `required: [id, manufacturer, name, releaseDate]` \
+   Updated: no `required` list
+
+   **Reason**: None of these names match a `FileObject` property (the properties are PascalCase, and `manufacturer` and `releaseDate` do not exist). `updateFile` sends a partial `FileObject`, for example only `FolderId`, so no property is made required in its place.
+
+9. Align the `Folder` schema with the other record schemas.
+
+   Original: no `type`, `required: [name]`, no `x-ballerina-name` on the properties \
+   Updated: `type: object`, `required: [Name]`, and `x-ballerina-name` giving camelCase field names (`name`, `fileCount`, `email`, `isInbox`, `id`)
+
+   **Reason**: Without the mapping the generated `Folder` fields were PascalCase, unlike every other record in the connector. `required` named a property that does not exist.
+
+Items 6 to 9 are applied to the aligned spec by `docs/spec/fix_aligned.py`, which is idempotent. Re-run it after `bal openapi align`.
 
 ## OpenAPI cli command
 

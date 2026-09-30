@@ -33,21 +33,25 @@ To use the Xero Files connector, you need a Xero account and an OAuth 2.0 app in
 
 ### Step 3: Get a refresh token
 
-1. Direct the user to the authorization URL, replacing `YOUR_CLIENT_ID` and `YOUR_REDIRECT_URI`. Request the `files` scope for read and write access to files and folders (or `files.read` for read-only access) and `offline_access` to receive a refresh token.
+1. Direct the user to the authorization URL, replacing `YOUR_CLIENT_ID`, `YOUR_REDIRECT_URI` and `YOUR_STATE`. `YOUR_STATE` must be a unique, unguessable value generated for each authorization request (for example, with `openssl rand -hex 16`) and stored with the user's session. Request the `files` scope for read and write access to files and folders (or `files.read` for read-only access) and `offline_access` to receive a refresh token.
 
 ```
-https://login.xero.com/identity/connect/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&scope=offline_access files
+https://login.xero.com/identity/connect/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&scope=offline_access files&state=YOUR_STATE
 ```
 
-2. After the user authorizes the app, Xero redirects to your redirect URI with an authorization code.
+2. After the user authorizes the app, Xero redirects to your redirect URI with an authorization code and the `state` value. Before you use the code, check that `state` matches the value you stored for this request, and reject the callback if it does not.
 
-3. Exchange the code for tokens.
+3. Exchange the code for tokens. The following reads the client credentials and the authorization code without echoing them, and passes them to `curl` on standard input so they do not appear in the command line or the shell history. Replace `YOUR_REDIRECT_URI`.
 
-```curl
-curl -X POST https://identity.xero.com/connect/token \
-  -H "Authorization: Basic $(echo -n 'CLIENT_ID:CLIENT_SECRET' | base64)" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "grant_type=authorization_code&code=AUTHORIZATION_CODE&redirect_uri=YOUR_REDIRECT_URI"
+```bash
+printf 'Client ID: '; read -r CLIENT_ID
+printf 'Client secret: '; read -rs CLIENT_SECRET; echo
+printf 'Authorization code: '; read -rs AUTHORIZATION_CODE; echo
+
+printf 'header = "Authorization: Basic %s"\ndata = "grant_type=authorization_code&code=%s&redirect_uri=YOUR_REDIRECT_URI"\n' \
+  "$(printf '%s:%s' "$CLIENT_ID" "$CLIENT_SECRET" | base64 | tr -d '\n')" "$AUTHORIZATION_CODE" |
+  curl -X POST https://identity.xero.com/connect/token \
+    -H "Content-Type: application/x-www-form-urlencoded" -K -
 ```
 
 The response contains an `access_token` and a `refresh_token`.
@@ -56,9 +60,11 @@ The response contains an `access_token` and a `refresh_token`.
 
 Every Files API call needs the ID of the Xero organisation to work with, sent in the `xero-tenant-id` header. List the organisations the user has connected.
 
-```curl
-curl -X GET https://api.xero.com/connections \
-  -H "Authorization: Bearer ACCESS_TOKEN"
+```bash
+printf 'Access token: '; read -rs ACCESS_TOKEN; echo
+
+printf 'header = "Authorization: Bearer %s"\n' "$ACCESS_TOKEN" |
+  curl -X GET https://api.xero.com/connections -K -
 ```
 
 Use the `tenantId` of the organisation you want to work with.

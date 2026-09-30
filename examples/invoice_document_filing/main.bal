@@ -11,7 +11,7 @@ configurable string tenantId = ?;
 configurable string folderName = ?;
 configurable string invoiceId = ?;
 configurable string documentName = ?;
-configurable string documentBase64 = ?;
+configurable string documentPath = ?;
 configurable string documentMimeType = "application/pdf";
 
 public function main() returns error? {
@@ -19,18 +19,19 @@ public function main() returns error? {
         auth: {clientId, clientSecret, refreshToken}
     });
 
-    files:Folder folder = check xeroFiles->createFolder({xeroTenantId: tenantId}, {Name: folderName});
-    string? folderId = folder.Id;
+    files:Folder folder = check xeroFiles->createFolder({xeroTenantId: tenantId}, {name: folderName});
+    string? folderId = folder.id;
     if folderId is () {
         return error("Xero did not return an id for the created folder");
     }
     io:println("Created folder ", folderName, " with id ", folderId);
 
+    byte[] documentContent = check io:fileReadBytes(documentPath);
     files:FileObject uploaded = check xeroFiles->uploadFileToFolder(folderId, {xeroTenantId: tenantId}, {
         filename: documentName,
         name: documentName,
         mimeType: documentMimeType,
-        body: documentBase64
+        body: {fileContent: documentContent, fileName: documentName}
     });
     string? fileId = uploaded.id;
     if fileId is () {

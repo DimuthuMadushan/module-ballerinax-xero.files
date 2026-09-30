@@ -33,7 +33,7 @@ public type FileUploadRequest record {
     # exact name of the file you are uploading
     string name;
     string mimeType?;
-    string body;
+    record {byte[] fileContent; string fileName;} body;
 };
 
 public type User record {
@@ -66,15 +66,20 @@ public type UploadFileToFolderHeaders record {
 
 public type Folder record {
     # The name of the folder
-    string Name?;
+    @jsondata:Name {value: "Name"}
+    string name;
     # The number of files in the folder
-    int FileCount?;
+    @jsondata:Name {value: "FileCount"}
+    int fileCount?;
     # The email address used to email files to the inbox. Only the inbox will have this element.
-    string Email?;
+    @jsondata:Name {value: "Email"}
+    string email?;
     # to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted.
-    boolean IsInbox?;
+    @jsondata:Name {value: "IsInbox"}
+    boolean isInbox?;
     # Xero unique identifier for a folder  Files
-    string Id?;
+    @jsondata:Name {value: "Id"}
+    string id?;
 };
 
 # Represents the Headers record for the operation: createFolder

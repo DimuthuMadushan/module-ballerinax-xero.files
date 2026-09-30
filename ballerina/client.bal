@@ -181,7 +181,7 @@ public isolated client class Client {
     # + return - Association counts keyed by object ID 
     remote isolated function countAssociations(CountAssociationsHeaders headers, *CountAssociationsQueries queries) returns record {}|error {
         string resourcePath = string `/Associations/Count`;
-        map<Encoding> queryParamEncoding = {"ObjectIds": {style: FORM, explode: true}};
+        map<Encoding> queryParamEncoding = {"ObjectIds": {style: FORM, explode: false}};
         resourcePath = resourcePath + check getPathForQueryParam(queries, queryParamEncoding);
         map<string|string[]> httpHeaders = http:getHeaderMap(headers);
         return self.clientEp->get(resourcePath, httpHeaders);
