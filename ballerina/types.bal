@@ -65,21 +65,21 @@ public type UploadFileToFolderHeaders record {
 };
 
 public type Folder record {
-    # The name of the folder
-    @jsondata:Name {value: "Name"}
-    string name;
+    # to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted
+    @jsondata:Name {value: "IsInbox"}
+    boolean isInbox?;
     # The number of files in the folder
     @jsondata:Name {value: "FileCount"}
     int fileCount?;
-    # The email address used to email files to the inbox. Only the inbox will have this element.
+    # The email address used to email files to the inbox. Only the inbox will have this element
     @jsondata:Name {value: "Email"}
     string email?;
-    # to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted.
-    @jsondata:Name {value: "IsInbox"}
-    boolean isInbox?;
     # Xero unique identifier for a folder  Files
     @jsondata:Name {value: "Id"}
     string id?;
+    # The name of the folder
+    @jsondata:Name {value: "Name"}
+    string name;
 };
 
 # Represents the Headers record for the operation: createFolder

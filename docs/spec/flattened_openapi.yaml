@@ -69,7 +69,7 @@ paths:
           - DESC
       responses:
         "200":
-          description: search results matching criteria
+          description: List of files
           content:
             application/json:
               schema:
@@ -101,6 +101,7 @@ paths:
       parameters:
       - $ref: "#/components/parameters/idempotencyKey"
       requestBody:
+        description: File content and metadata to upload to the inbox
         content:
           multipart/form-data:
             schema:
@@ -108,7 +109,7 @@ paths:
         required: true
       responses:
         "201":
-          description: A successful request
+          description: File uploaded to the inbox
           content:
             application/json:
               schema:
@@ -151,7 +152,7 @@ paths:
         x-snake: file_id
       responses:
         "200":
-          description: search results matching criteria
+          description: The requested file
           content:
             application/json:
               schema:
@@ -187,6 +188,7 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: file_id
       requestBody:
+        description: Updated file properties such as name and folder
         content:
           application/json:
             schema:
@@ -195,7 +197,7 @@ paths:
         required: true
       responses:
         "200":
-          description: A successful request
+          description: The updated file
           content:
             application/json:
               schema:
@@ -264,6 +266,7 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: folder_id
       requestBody:
+        description: File content and metadata to upload to the folder
         content:
           multipart/form-data:
             schema:
@@ -271,7 +274,7 @@ paths:
         required: true
       responses:
         "201":
-          description: A successful request
+          description: File uploaded to the folder
           content:
             application/json:
               schema:
@@ -316,7 +319,7 @@ paths:
         x-snake: file_id
       responses:
         "200":
-          description: returns the byte array of the specific file based on id
+          description: Content of the file as a byte array
           content:
             application/octet-stream:
               schema:
@@ -349,7 +352,7 @@ paths:
         x-snake: file_id
       responses:
         "200":
-          description: search results matching criteria
+          description: List of associations of the file
           content:
             application/json:
               schema:
@@ -383,6 +386,7 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: file_id
       requestBody:
+        description: Association linking the file to an object
         content:
           application/json:
             schema:
@@ -392,7 +396,7 @@ paths:
         required: true
       responses:
         "201":
-          description: A successful request
+          description: The created file association
           content:
             application/json:
               schema:
@@ -518,7 +522,7 @@ paths:
           - DESC
       responses:
         "200":
-          description: search results matching criteria
+          description: List of associations of the object
           content:
             application/json:
               schema:
@@ -550,7 +554,7 @@ paths:
         description: A comma-separated list of object ids
         required: true
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -559,7 +563,7 @@ paths:
             example: 1270bf7c-5d18-473a-9231-1e36c4bd33ed
       responses:
         "200":
-          description: A dictionary of the object Ids and associations count
+          description: Association counts keyed by object ID
           content:
             application/json:
               schema:
@@ -596,7 +600,7 @@ paths:
           - CreatedDateUTC
       responses:
         "200":
-          description: search results matching criteria
+          description: List of folders
           content:
             application/json:
               schema:
@@ -621,6 +625,7 @@ paths:
       parameters:
       - $ref: "#/components/parameters/idempotencyKey"
       requestBody:
+        description: Properties of the folder to create
         content:
           application/json:
             schema:
@@ -629,7 +634,7 @@ paths:
         required: true
       responses:
         "200":
-          description: search results matching criteria
+          description: The created folder
           content:
             application/json:
               schema:
@@ -669,7 +674,7 @@ paths:
         x-snake: folder_id
       responses:
         "200":
-          description: search results matching criteria
+          description: The requested folder
           content:
             application/json:
               schema:
@@ -701,6 +706,7 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: folder_id
       requestBody:
+        description: Updated properties of the folder
         content:
           application/json:
             schema:
@@ -709,7 +715,7 @@ paths:
         required: true
       responses:
         "200":
-          description: return the updated object
+          description: The updated folder
           content:
             application/json:
               schema:
@@ -761,7 +767,7 @@ paths:
       operationId: getInbox
       responses:
         "200":
-          description: search results matching criteria
+          description: The inbox folder
           content:
             application/json:
               schema:
@@ -794,11 +800,6 @@ components:
           items:
             $ref: "#/components/schemas/FileObject"
     FileObject:
-      required:
-      - id
-      - manufacturer
-      - name
-      - releaseDate
       type: object
       properties:
         Name:
@@ -843,7 +844,7 @@ components:
       properties:
         body:
           type: string
-          format: byte
+          format: binary
         name:
           type: string
           description: exact name of the file you are uploading
@@ -887,31 +888,37 @@ components:
             $ref: "#/components/schemas/Folder"
     Folder:
       required:
-      - name
+      - Name
+      type: object
       properties:
         Name:
           type: string
           description: The name of the folder
           example: assets
+          x-ballerina-name: name
         FileCount:
           type: integer
           description: The number of files in the folder
           example: 5
+          x-ballerina-name: fileCount
         Email:
           type: string
           description: The email address used to email files to the inbox. Only the
             inbox will have this element.
           example: foo@bar.com
+          x-ballerina-name: email
         IsInbox:
           type: boolean
           description: to indicate if the folder is the Inbox. The Inbox cannot be
             renamed or deleted.
           example: true
+          x-ballerina-name: isInbox
         Id:
           type: string
           description: Xero unique identifier for a folder  Files
           format: uuid
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
+          x-ballerina-name: id
     Association:
       type: object
       properties:

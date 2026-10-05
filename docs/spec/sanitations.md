@@ -45,7 +45,7 @@ These changes are done in order to improve the overall usability, and as workaro
    Original: `FileUploadRequest.body` is `type: string, format: byte` \
    Updated: `type: string, format: binary`
 
-   **Reason**: The upload operations carry the file itself in a multipart part. As a byte string the body was typed `string` and sent as a text part, so Xero stored the base64 text instead of the document. As binary it is typed `record {byte[] fileContent; string fileName;}`, which `createBodyParts` sends as a file part with a filename. This takes effect only once `uploadFile` and `uploadFileToFolder` pass the payload to `createBodyParts` directly. The generated `createBodyParts(check jsondata:toJson(payload).ensureType())` turns the bytes into a JSON array first.
+   **Reason**: The upload operations carry the file itself in a multipart part. As a byte string the body was typed `string` and sent as a text part, so Xero stored the base64 text instead of the document. As binary it is typed `record {byte[] fileContent; string fileName;}`, which `createBodyParts` sends as a file part with a filename. This takes effect only once `uploadFile` and `uploadFileToFolder` pass the payload to `createBodyParts` directly. The generated `createBodyParts(check jsondata:toJson(payload).ensureType())` turns the bytes into a JSON array first. Applied to the original spec (`UploadObject`, which align renames to `FileUploadRequest`).
 
 7. Send `ObjectIds` as a comma-separated list.
 
@@ -68,7 +68,7 @@ These changes are done in order to improve the overall usability, and as workaro
 
    **Reason**: Without the mapping the generated `Folder` fields were PascalCase, unlike every other record in the connector. `required` named a property that does not exist.
 
-Items 6 to 9 are applied to the aligned spec by `docs/spec/fix_aligned.py`, which is idempotent. Re-run it after `bal openapi align`.
+Items 6 to 9 are applied directly to the original `docs/spec/openapi.yaml`, so flatten and align carry them into the aligned spec without any further step.
 
 ## OpenAPI cli command
 

@@ -96,12 +96,12 @@ paths:
       parameters:
       - $ref: '#/components/parameters/idempotencyKey'
       requestBody:
+        description: File content and metadata to upload to the inbox
         content:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/FileUploadRequest'
         required: true
-        description: File content and metadata to upload to the inbox
       responses:
         '201':
           description: File uploaded to the inbox
@@ -179,13 +179,13 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: file_id
       requestBody:
+        description: Updated file properties such as name and folder
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/FileObject'
             example: '{ "FolderId": "bf924975-7097-46f2-a143-1ecfbab3c8c3" }'
         required: true
-        description: Updated file properties such as name and folder
       responses:
         '200':
           description: The updated file
@@ -254,12 +254,12 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: folder_id
       requestBody:
+        description: File content and metadata to upload to the folder
         content:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/FileUploadRequest'
         required: true
-        description: File content and metadata to upload to the folder
       responses:
         '201':
           description: File uploaded to the folder
@@ -370,6 +370,7 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: file_id
       requestBody:
+        description: Association linking the file to an object
         content:
           application/json:
             schema:
@@ -377,7 +378,6 @@ paths:
             example: '{ "ObjectId": "1270bf7c-5d18-473a-9231-1e36c4bd33ed", "ObjectGroup": "Contact",
               "ObjectType": "Business" }'
         required: true
-        description: Association linking the file to an object
       responses:
         '201':
           description: The created file association
@@ -485,12 +485,12 @@ paths:
         schema:
           type: string
           example: Associations/{ObjectId}?sort=CreatedDateUtc
-          default: CreatedDateUtc
           enum:
           - Name
           - Size
           - CreatedDateUtc
           - AssociationDateUtc
+          default: CreatedDateUtc
       - name: direction
         in: query
         description: direction to sort by
@@ -604,13 +604,13 @@ paths:
       parameters:
       - $ref: '#/components/parameters/idempotencyKey'
       requestBody:
+        description: Properties of the folder to create
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Folder'
             example: '{ "Name": "My Docs" }'
         required: true
-        description: Properties of the folder to create
       responses:
         '200':
           description: The created folder
@@ -683,13 +683,13 @@ paths:
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
         x-snake: folder_id
       requestBody:
+        description: Updated properties of the folder
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Folder'
             example: '{ "Name": "Your Docs" }'
         required: true
-        description: Updated properties of the folder
       responses:
         '200':
           description: The updated folder
@@ -1006,11 +1006,11 @@ components:
       - Name
       type: object
       properties:
-        Name:
-          type: string
-          description: The name of the folder
-          example: assets
-          x-ballerina-name: name
+        IsInbox:
+          type: boolean
+          description: to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted
+          example: true
+          x-ballerina-name: isInbox
         FileCount:
           type: integer
           description: The number of files in the folder
@@ -1019,20 +1019,20 @@ components:
         Email:
           type: string
           description: The email address used to email files to the inbox. Only the inbox will have this
-            element.
+            element
           example: foo@bar.com
           x-ballerina-name: email
-        IsInbox:
-          type: boolean
-          description: to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted.
-          example: true
-          x-ballerina-name: isInbox
         Id:
           type: string
           description: Xero unique identifier for a folder  Files
           format: uuid
           example: 4ff1e5cc-9835-40d5-bb18-09fdb118db9c
           x-ballerina-name: id
+        Name:
+          type: string
+          description: The name of the folder
+          example: assets
+          x-ballerina-name: name
   parameters:
     requiredHeader:
       name: xero-tenant-id

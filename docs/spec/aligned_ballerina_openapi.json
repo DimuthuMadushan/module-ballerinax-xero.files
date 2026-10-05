@@ -126,6 +126,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "File content and metadata to upload to the inbox",
                     "content": {
                         "multipart/form-data": {
                             "schema": {
@@ -133,8 +134,7 @@
                             }
                         }
                     },
-                    "required": true,
-                    "description": "File content and metadata to upload to the inbox"
+                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -243,6 +243,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Updated file properties such as name and folder",
                     "content": {
                         "application/json": {
                             "schema": {
@@ -251,8 +252,7 @@
                             "example": "{ \"FolderId\": \"bf924975-7097-46f2-a143-1ecfbab3c8c3\" }"
                         }
                     },
-                    "required": true,
-                    "description": "Updated file properties such as name and folder"
+                    "required": true
                 },
                 "responses": {
                     "200": {
@@ -353,6 +353,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "File content and metadata to upload to the folder",
                     "content": {
                         "multipart/form-data": {
                             "schema": {
@@ -360,8 +361,7 @@
                             }
                         }
                     },
-                    "required": true,
-                    "description": "File content and metadata to upload to the folder"
+                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -526,6 +526,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Association linking the file to an object",
                     "content": {
                         "application/json": {
                             "schema": {
@@ -534,8 +535,7 @@
                             "example": "{ \"ObjectId\": \"1270bf7c-5d18-473a-9231-1e36c4bd33ed\", \"ObjectGroup\": \"Contact\", \"ObjectType\": \"Business\" }"
                         }
                     },
-                    "required": true,
-                    "description": "Association linking the file to an object"
+                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -689,13 +689,13 @@
                         "schema": {
                             "type": "string",
                             "example": "Associations/{ObjectId}?sort=CreatedDateUtc",
-                            "default": "CreatedDateUtc",
                             "enum": [
                                 "Name",
                                 "Size",
                                 "CreatedDateUtc",
                                 "AssociationDateUtc"
-                            ]
+                            ],
+                            "default": "CreatedDateUtc"
                         }
                     },
                     {
@@ -866,6 +866,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Properties of the folder to create",
                     "content": {
                         "application/json": {
                             "schema": {
@@ -874,8 +875,7 @@
                             "example": "{ \"Name\": \"My Docs\" }"
                         }
                     },
-                    "required": true,
-                    "description": "Properties of the folder to create"
+                    "required": true
                 },
                 "responses": {
                     "200": {
@@ -985,6 +985,7 @@
                     }
                 ],
                 "requestBody": {
+                    "description": "Updated properties of the folder",
                     "content": {
                         "application/json": {
                             "schema": {
@@ -993,8 +994,7 @@
                             "example": "{ \"Name\": \"Your Docs\" }"
                         }
                     },
-                    "required": true,
-                    "description": "Updated properties of the folder"
+                    "required": true
                 },
                 "responses": {
                     "200": {
@@ -1403,11 +1403,11 @@
                 ],
                 "type": "object",
                 "properties": {
-                    "Name": {
-                        "type": "string",
-                        "description": "The name of the folder",
-                        "example": "assets",
-                        "x-ballerina-name": "name"
+                    "IsInbox": {
+                        "type": "boolean",
+                        "description": "to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted",
+                        "example": true,
+                        "x-ballerina-name": "isInbox"
                     },
                     "FileCount": {
                         "type": "integer",
@@ -1417,15 +1417,9 @@
                     },
                     "Email": {
                         "type": "string",
-                        "description": "The email address used to email files to the inbox. Only the inbox will have this element.",
+                        "description": "The email address used to email files to the inbox. Only the inbox will have this element",
                         "example": "foo@bar.com",
                         "x-ballerina-name": "email"
-                    },
-                    "IsInbox": {
-                        "type": "boolean",
-                        "description": "to indicate if the folder is the Inbox. The Inbox cannot be renamed or deleted.",
-                        "example": true,
-                        "x-ballerina-name": "isInbox"
                     },
                     "Id": {
                         "type": "string",
@@ -1433,6 +1427,12 @@
                         "format": "uuid",
                         "example": "4ff1e5cc-9835-40d5-bb18-09fdb118db9c",
                         "x-ballerina-name": "id"
+                    },
+                    "Name": {
+                        "type": "string",
+                        "description": "The name of the folder",
+                        "example": "assets",
+                        "x-ballerina-name": "name"
                     }
                 }
             }
